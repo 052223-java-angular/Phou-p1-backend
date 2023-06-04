@@ -12,24 +12,30 @@ those Gainz!
 
 ## BE User Stories
 
-- **As a user**, I want to be able to register and login, so I can save my reports and retrieve those reports at a later time.
-- **As a user**, I want to be able to retrieve my trades and generate a report in .csv or .json format.
-- **As a user**, I want to be able to query and retrieve my reports by asset, date, amount.
+- **As a user**, I want to be able to register for an account, so I can save my trade history and view them at a later time.
+- **As a user**, I want to be able to login to my account, so that I can save, modify and / or request the data I had saved into my account.
+- **As a user**, I want to know which assets are supported, so that I know which assets I can save data for and include in my P & L analysis.
+- **As a user**, I want to be able to query my trade history, so that I am able to extract / view my data by asset name, price range and date.
+- **As a user**, I want the most up to date information on my asset, so that I have the data to assess P & L expectations.
 
 ## MVP (Minimum Viable Product)
 
-- User registration
-- User login via jwt authentication
-- Adding and modifying trade / order history
-- Generating P&L report and sending the report back the user in .csv and / or .json format
-- Search and query for trade records by asset, date and amount
-- Fetching cryptocurrency prices from coinmarket or coingecko or other API
+- Api endpoint that will accept and / or properly handle errors for a user registration request and create a new account for a new user.
+- Api endpoint that will accept and / or properly handle errors for a user login request and authenticate using jwt authentication.
+- Api endpoint that will accept and / or properly handle errors for a registered users request to store / add their trade history data.
+- Api endpoint that will accept and / or properly handle errors for modifying trade / order history.
+- Api endpoint that will accept users requests to retrieve data for a crypto asset by criteria name, price range, marketcap, date.
+- Api endpoint that will accept an authenticated users request to update their profile info.
+- Server is able to fetch and properly handle errors when retrieving crypto asset data from an external api, i.e. coingecko
+- Server is able to store / persist crypto asset data received from an external api
 
 ## Stretch Goals
 
-- Add asynchronous processing for fetching API data
-- Add send report by email
-- Implement threads in order to increase processing times for generating reports
+- Generating P&L report and sending the report back the user in .csv and / or .json format.
+- Add asynchronous processing or threads for fetching API data.
+- Add a recommendation engine utilizing crypto / asset data from coingecko i.e. add additional endpoints to extract more data and trade history.
+- Generate report and send to registered email.
+- Implement threads when generating reports.
 
 ## Tech Stack
 
