@@ -12,22 +12,22 @@ those Gainz!
 
 ## BE User Stories
 
-- **As a user**, I want to be able to register for an account, so I can save my trade history and view them at a later time.
-- **As a user**, I want to be able to login to my account, so that I can save, modify and / or request the data I had saved into my account.
-- **As a user**, I want to know which assets are supported, so that I know which assets I can save data for and include in my P & L analysis.
+- **As a user**, I want to be able to register for an account, so I can save my trade history and view it at a later time.
+- **As a user**, I want to be able to login to my account, so that I can save, modify and / or retrieve the data I had saved to my account.
+- **As a user**, I want to know which assets are supported, so that I know which assets I can include in my P & L analysis.
 - **As a user**, I want to be able to query my trade history, so that I am able to extract / view my data by asset name, price range and date.
-- **As a user**, I want the most up to date information on my asset, so that I have the data to assess P & L expectations.
+- **As a user**, I want the most up to date information on my asset, so that I have the data to properly genearate and assess the P & L of my trades.
 
 ## MVP (Minimum Viable Product)
 
-- Api endpoint that will accept and / or properly handle errors for a user registration request and create a new account for a new user.
-- Api endpoint that will accept and / or properly handle errors for a user login request and authenticate using jwt authentication.
-- Api endpoint that will accept and / or properly handle errors for a registered users request to store / add their trade history data.
-- Api endpoint that will accept and / or properly handle errors for modifying trade / order history.
-- Api endpoint that will accept users requests to retrieve data for a crypto asset by criteria name, price range, marketcap, date.
-- Api endpoint that will accept an authenticated users request to update their profile info.
-- Server is able to fetch and properly handle errors when retrieving crypto asset data from an external api, i.e. coingecko
-- Server is able to store / persist crypto asset data received from an external api
+- Api endpoint accepts and properly handles errors for a user registration request and creates a new account for a new user.
+- Api endpoint accepts and properly handles errors for a user login request and authenticates the user using jwt authentication.
+- Api endpoint accepts and properly handles errors for a registered users request to store / save their trade history data.
+- Api endpoint accepts and properly handles errors for modifying trade / order history.
+- Api endpoint accepts users requests to retrieve data for a crypto asset by criteria. (i.e. name, price range, marketcap, date)
+- Api endpoint accepts an authenticated users request to update their profile info.
+- Server is able to fetch and properly handles errors when retrieving crypto asset data from an external api. (i.e. coingecko)
+- Server is able to store / persist crypto asset data received from an external api. (i.e. coingecko)
 
 ## Stretch Goals
 
