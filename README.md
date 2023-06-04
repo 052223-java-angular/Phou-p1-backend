@@ -2,13 +2,10 @@
 
 ## Introduction
 
-Yield is an web application that allows a user to upload a .csv file of their trades and generate a profit and loss .csv report. In addition to generating a
-.csv report, the user can view the generated results within a web-browser like Chrome.
+The backend of Yield is an api that allows a user to save and then retrieve their trade history and / or generate a profit and loss report. In addition to reports, 
+the api will allow users to retrieve the data of various assets.
 
-As part of the integration, yield will utilize the Coinmarketcap or similar API to extract past and current price data of crypto assets for calculating figures.
-
-Although the app is free to use, yield may also integrate the Coinbase API for accepting crypto payment / donations for those feeling the need to donate some of
-those Gainz!
+In order to get the asset data, the api will utilize the CoinGecko api to extract data of the crypto assets and save this to our backend DB to serve.
 
 ## BE User Stories
 
@@ -16,7 +13,7 @@ those Gainz!
 - **As a user**, I want to be able to login to my account, so that I can save, modify and / or retrieve the data I had saved to my account.
 - **As a user**, I want to know which assets are supported, so that I know which assets I can include in my P & L analysis.
 - **As a user**, I want to be able to query my trade history, so that I am able to extract / view my data by asset name, price range and date.
-- **As a user**, I want the most up to date information on my asset, so that I have the data to properly genearate and assess the P & L of my trades.
+- **As a user**, I want the most up-to-date information on my assets, so that I have the data to properly generate and assess the P & L of my trades.
 
 ## MVP (Minimum Viable Product)
 
@@ -26,14 +23,14 @@ those Gainz!
 - Api endpoint accepts and properly handles errors for modifying trade / order history.
 - Api endpoint accepts users requests to retrieve data for a crypto asset by criteria. (i.e. name, price range, marketcap, date)
 - Api endpoint accepts an authenticated users request to update their profile info.
-- Server is able to fetch and properly handles errors when retrieving crypto asset data from an external api. (i.e. coingecko)
-- Server is able to store / persist crypto asset data received from an external api. (i.e. coingecko)
+- Server is able to fetch and properly handles errors when retrieving crypto asset data from an external api. (i.e. Coingecko)
+- Server is able to store / persist crypto asset data received from an external api. (i.e. Coingecko)
 
 ## Stretch Goals
 
 - Generating P&L report and sending the report back the user in .csv and / or .json format.
 - Add asynchronous processing or threads for fetching API data.
-- Add a recommendation engine utilizing crypto / asset data from coingecko i.e. add additional endpoints to extract more data and trade history.
+- Add a recommendation engine utilizing crypto / asset data from Coingecko (e.g. add additional endpoints to extract more data from Coingecko, use trade history)
 - Generate report and send to registered email.
 - Implement threads when generating reports.
 
@@ -48,7 +45,7 @@ those Gainz!
 - **BCrypt**: A Java library for hashing and checking passwords for security.
 - **Log4j**: A logging utility for debugging purposes.
 - **JUnit**: A testing framework for Java applications, used to ensure our code works as expected.
-- **JUnit, Mockito, and PowerMock**: Used for unit and integration testing.
+- **Mockito, and PowerMock**: Used for unit and integration testing.
 - **Git and GitHub**: Used for version control.
 
 ## Requirements
