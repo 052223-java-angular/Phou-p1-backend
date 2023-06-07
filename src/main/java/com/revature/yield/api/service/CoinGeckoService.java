@@ -85,16 +85,57 @@ public class CoinGeckoService {
 
     }
 
+    /* api request to get the historical price of an asset from resource /coins/{id}/history
+     *
+     * @param paramConfigObj a configuration object containing the fields and values in which the api resource accepts and recognizes as valid
+     * @return the coins price history
+     *  */
     public <T extends Param> CoinHistoryDTO getCoinHistory(T paramConfigObj) throws IOException {
 
         // transform response into desired format, i.e. string, json, etc
         JSONObject jsonObj = toJsonObject(getApiResource(paramConfigObj));
 
-        // extract all the keys and value types from the current jsonObject by using the key
-        Map<String, Object> mKeyPairs = extractKeyAndJsonType(jsonObj, new HashMap<>(), true);
+        // because there are duplicate keys within nested JSON objects, extract only object types
+        Map<String, Object> mKeyPairs = extractKeyAndJsonType(jsonObj, new HashMap<>(), false);
 
-        Map<String, String> keyValuePairs = mapObjectsToString(mKeyPairs);
+        Map<String, String>  keyValuePairs = new HashMap<>();
+        // add non-object type key : value pair
+        keyValuePairs.put("id", (String) jsonObj.get("id"));
+        keyValuePairs.put("symbol", (String) jsonObj.get("symbol"));
+        keyValuePairs.put("name", (String) jsonObj.get("name"));
         keyValuePairs.put("date_time", ((CoinHistoryParam) paramConfigObj).formatDateTime());
+
+        // iterate over the JSON object types that were found
+        for (String key : mKeyPairs.keySet()) {
+
+            // extract all the keys and value types from the current jsonObject using the present / current key
+            Map<String, Object> valuesInTheJsonObj = extractKeyAndJsonType((JSONObject) mKeyPairs.get(key), new HashMap<>(), true);
+            Map<String, String> mapWithStringVals = mapObjectsToString(valuesInTheJsonObj);
+
+            // iterate through the key : value pairs found
+            for (String entryKey : mapWithStringVals.keySet()) {
+                if (key.equalsIgnoreCase("market_data")) {
+
+                    // break after setting the map entries - only need the value from the usd, btc, eth and bnb key
+                    keyValuePairs.put("usd", mapWithStringVals.get("usd"));
+                    keyValuePairs.put("btc", mapWithStringVals.get("btc"));
+                    keyValuePairs.put("eth", mapWithStringVals.get("eth"));
+                    keyValuePairs.put("bnb", mapWithStringVals.get("bnb"));
+                    break;
+
+                } else if (key.equalsIgnoreCase("market_cap") || key.equalsIgnoreCase("total_volume")) {
+
+                    // break after setting the map entry - only need the value from the usd key
+                    keyValuePairs.put(key, mapWithStringVals.get("usd"));
+                    break;
+
+                } else {
+
+                    keyValuePairs.put(entryKey, mapWithStringVals.get(entryKey));
+                }
+            }
+
+        }
 
         return toCoinHistoryFromMap(keyValuePairs);
 
@@ -126,7 +167,10 @@ public class CoinGeckoService {
                 .withBtcPrice(toDouble(mapEntry.get("btc")))
                 .withEthPrice(toDouble(mapEntry.get("eth")))
                 .withBnbPrice(toDouble(mapEntry.get("bnb")))
+                .withTotalVolume(toDouble(mapEntry.get("total_volume")))
+                .withMarketCap(toDouble(mapEntry.get("market_cap")))
                 .withDateTime(mapEntry.get("date_time"))
                 .build();
     }
+
 }

@@ -20,6 +20,8 @@ public class CoinHistoryDTO {
     private double btc;
     private double eth;
     private double bnb;
+    private double total_volume;
+    private double market_cap;
     private String date_time;
 
     private CoinHistoryDTO(Builder builder) {
@@ -31,6 +33,8 @@ public class CoinHistoryDTO {
         this.btc = builder.btc;
         this.eth = builder.eth;
         this.bnb = builder.bnb;
+        this.total_volume = builder.total_volume;
+        this.market_cap = builder.market_cap;
         this.date_time = builder.date_time;
     }
 
@@ -43,6 +47,8 @@ public class CoinHistoryDTO {
         private double btc;
         private double eth;
         private double bnb;
+        private double total_volume;
+        private double market_cap;
         private String date_time;
 
         public Builder(String id) {
@@ -81,6 +87,16 @@ public class CoinHistoryDTO {
 
         public Builder withBnbPrice(double bnbPrice) {
             this.bnb = bnbPrice;
+            return this;
+        }
+
+        public Builder withTotalVolume(double totalVolume) {
+            this.total_volume = totalVolume;
+            return this;
+        }
+
+        public Builder withMarketCap(double marketCap) {
+            this.market_cap = marketCap;
             return this;
         }
 

@@ -29,6 +29,10 @@ public class JsonUtil {
         return new JSONObject(sb.toString());
     }
 
+    public static JSONObject toJsonObject(Map<String, Object> mapEntry) {
+        return new JSONObject(mapEntry);
+    }
+
     /* transforms the object values of a mappedEntry into a String format
     *
     * @param mapObj mapped entries of key and value pairs
