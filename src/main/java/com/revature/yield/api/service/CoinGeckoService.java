@@ -1,6 +1,8 @@
 package com.revature.yield.api.service;
 
+import com.revature.yield.api.configs.CoinHistoryParam;
 import com.revature.yield.api.configs.Param;
+import com.revature.yield.api.dtos.CoinHistoryDTO;
 import com.revature.yield.api.dtos.PriceHistoryDTO;
 import com.revature.yield.utils.custom_exceptions.HttpException;
 import org.json.JSONObject;
@@ -42,7 +44,7 @@ public class CoinGeckoService {
         // set http header - does not require an API key
         httpURLConnection.setRequestMethod("GET");
 
-        // validate response for valid status code
+        // make the request and validate the response for a valid status code
         int resCode = httpURLConnection.getResponseCode();
         if (resCode != 200) {
             throw new HttpException("HTTP Response code: " + resCode);
@@ -83,11 +85,26 @@ public class CoinGeckoService {
 
     }
 
+    public <T extends Param> CoinHistoryDTO getCoinHistory(T paramConfigObj) throws IOException {
 
+        // transform response into desired format, i.e. string, json, etc
+        JSONObject jsonObj = toJsonObject(getApiResource(paramConfigObj));
+
+        // extract all the keys and value types from the current jsonObject by using the key
+        Map<String, Object> mKeyPairs = extractKeyAndJsonType(jsonObj, new HashMap<>(), true);
+
+        Map<String, String> keyValuePairs = mapObjectsToString(mKeyPairs);
+        keyValuePairs.put("date_time", ((CoinHistoryParam) paramConfigObj).formatDateTime());
+
+        return toCoinHistoryFromMap(keyValuePairs);
+
+    }
 
     /*==========   HELPER METHODS FOR CREATING OBJECTS  =================*/
 
 
+    /* Retrieves the current price history
+    * */
     private PriceHistoryDTO toPriceHistoryFromMap(Map<String, String> mapEntry) {
         return new PriceHistoryDTO.Builder(mapEntry.get("id"))
                 .withPrice(toDouble(mapEntry.get("usd")))
@@ -95,6 +112,21 @@ public class CoinGeckoService {
                 .withTotalVolume24Hr(toDouble(mapEntry.get("usd_24h_vol")))
                 .withTotalVolume24HrChange(toDouble(mapEntry.get("usd_24h_change")))
                 .withDateAndTime(mapEntry.get("last_updated_at"))
+                .build();
+    }
+
+    /* Retrieves the historical price history
+    * */
+    private CoinHistoryDTO toCoinHistoryFromMap(Map<String, String> mapEntry) {
+        return new CoinHistoryDTO.Builder(mapEntry.get("id"))
+                .withSymbol(mapEntry.get("symbol"))
+                .withName(mapEntry.get("name"))
+                .withImages(mapEntry.get("small") + "," + mapEntry.get("thumb"))
+                .withUsdPrice(toDouble(mapEntry.get("usd")))
+                .withBtcPrice(toDouble(mapEntry.get("btc")))
+                .withEthPrice(toDouble(mapEntry.get("eth")))
+                .withBnbPrice(toDouble(mapEntry.get("bnb")))
+                .withDateTime(mapEntry.get("date_time"))
                 .build();
     }
 }

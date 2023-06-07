@@ -15,7 +15,7 @@ public class JsonUtil {
     /* reads from input stream and output the input stream into a string and then create a new JsonObject from the string
     *
     * @param inputStream the input stream to read from
-    * @return null or a JSON object created from the input stream
+    * @return a JSON object created from the input stream instance
     * */
     public static JSONObject toJsonObject(InputStream inputStream) throws IOException {
         StringBuilder sb = new StringBuilder();
@@ -44,6 +44,15 @@ public class JsonUtil {
         }
         return mEntries;
     }
+
+    public static Map<String, String> mapObjectsToString(JSONObject resourceKeys) {
+        Map<String, String> mapEntries = new HashMap<>();
+        for (var key : resourceKeys.keySet()) {
+            mapEntries.put(key, (String) resourceKeys.get(key));
+        }
+        return mapEntries;
+    }
+
 
 
     /*=============  HELPER METHODS FOR EXTRACTING VALUES FROM JSON OBJECTS =====================================*/

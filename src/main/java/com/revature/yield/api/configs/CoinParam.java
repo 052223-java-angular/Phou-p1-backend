@@ -1,12 +1,12 @@
 package com.revature.yield.api.configs;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 import static java.lang.String.format;
 
-@Builder
+@AllArgsConstructor
 @Getter
 @Setter
 public class CoinParam extends Param {
