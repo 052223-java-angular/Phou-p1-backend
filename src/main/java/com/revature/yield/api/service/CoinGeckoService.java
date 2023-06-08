@@ -1,33 +1,24 @@
 package com.revature.yield.api.service;
 
-import com.revature.yield.api.configs.CoinHistoryParam;
-import com.revature.yield.api.configs.Param;
-import com.revature.yield.api.dtos.CoinHistoryDTO;
-import com.revature.yield.api.dtos.PriceHistoryDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.revature.yield.api.dtos.Param;
+import com.revature.yield.api.dtos.coin.id.JCoinDTO;
+import com.revature.yield.api.dtos.coin.history.JHistoryCoinDTO;
+import com.revature.yield.api.dtos.coin.simple_price.JPriceSimpleDTO;
 import com.revature.yield.utils.custom_exceptions.HttpException;
-import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static com.revature.yield.utils.DataTypeUtil.toDouble;
-import static com.revature.yield.utils.json.JsonUtil.*;
 
 @Service
 public class CoinGeckoService {
 
-//    https://api.coingecko.com/api/v3/simple/price?ids=Bitcoin&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true&include_24hr_change=true&include_last_updated_at=true&precision=full
-
     /* the base uri for Coingecko's api services / resource
     * */
-    private final String BASE_URI = "https://api.coingecko.com/api/v3/";
+    private static final String BASE_URI = "https://api.coingecko.com/api/v3/";
 
     /* gets the HTTP resource by creating a URL instance using a Base_uri and param resource url and opening a connection.
     *
@@ -54,123 +45,34 @@ public class CoinGeckoService {
         return httpURLConnection.getInputStream();
     }
 
-    /* api request to get the simple price of assets listed within the param-config-obj
+    /* api request to get the simple price of coin assets from /simple/price
     *
     * @param paramConfigObj a configuration object containing the fields and values in which the api resource accepts and recognizes as valid
+    * @param objectMapper a mapper for mapping input-stream into java objects
     * @return a list of the price history instances
     *  */
-    public <T extends Param> List<PriceHistoryDTO> getSimplePrice(T paramConfigObj) throws IOException {
+    public <T extends Param> JPriceSimpleDTO getSimplePrice(T paramConfigObj, ObjectMapper objectMapper) throws IOException {
+        return objectMapper.readValue(getApiResource(paramConfigObj), JPriceSimpleDTO.class);
+    }
 
-        // transform response into desired format, i.e. string, json, etc
-        JSONObject jsonObj = toJsonObject(getApiResource(paramConfigObj));
-
-        // extract the data array from the json object
-        List<PriceHistoryDTO> phList = new ArrayList<>();
-
-        // iterate through every key and create an entry
-        for (String key : jsonObj.keySet()) {
-
-            // extract all the keys and value types from the current jsonObject by using the key
-            Map<String, Object> mKeyPairs = extractKeyAndJsonType(jsonObj.getJSONObject(key), new HashMap<>(), true);
-
-            // add the top-level key as the id and map all other values into String format
-            mKeyPairs.put("id", key);
-            Map<String, String> keyValuePairs = mapObjectsToString(mKeyPairs);
-
-            // map the key & value pairs using the toDto helper method
-            phList.add(toPriceHistoryFromMap(keyValuePairs));
-
-        }
-        return phList;
-
+    /* api request to get the price of an asset from resource endpoint /coins/{id}
+     *
+     * @param paramConfigObj a configuration object containing the fields and values in which the api resource accepts and recognizes as valid
+     * @param objectMapper a mapper for mapping input-stream into java objects
+     * @return the coins price history
+     *  */
+    public <T extends Param> JCoinDTO getCoinById(T paramConfigObj, ObjectMapper objectMapper) throws IOException {
+        return objectMapper.readValue(getApiResource(paramConfigObj), JCoinDTO.class);
     }
 
     /* api request to get the historical price of an asset from resource /coins/{id}/history
      *
      * @param paramConfigObj a configuration object containing the fields and values in which the api resource accepts and recognizes as valid
+     * @param objectMapper a mapper for mapping input-stream into java objects
      * @return the coins price history
      *  */
-    public <T extends Param> CoinHistoryDTO getCoinHistory(T paramConfigObj) throws IOException {
-
-        // transform response into desired format, i.e. string, json, etc
-        JSONObject jsonObj = toJsonObject(getApiResource(paramConfigObj));
-
-        // because there are duplicate keys within nested JSON objects, extract only object types
-        Map<String, Object> mKeyPairs = extractKeyAndJsonType(jsonObj, new HashMap<>(), false);
-
-        Map<String, String>  keyValuePairs = new HashMap<>();
-        // add non-object type key : value pair
-        keyValuePairs.put("id", (String) jsonObj.get("id"));
-        keyValuePairs.put("symbol", (String) jsonObj.get("symbol"));
-        keyValuePairs.put("name", (String) jsonObj.get("name"));
-        keyValuePairs.put("date_time", ((CoinHistoryParam) paramConfigObj).formatDateTime());
-
-        // iterate over the JSON object types that were found
-        for (String key : mKeyPairs.keySet()) {
-
-            // extract all the keys and value types from the current jsonObject using the present / current key
-            Map<String, Object> valuesInTheJsonObj = extractKeyAndJsonType((JSONObject) mKeyPairs.get(key), new HashMap<>(), true);
-            Map<String, String> mapWithStringVals = mapObjectsToString(valuesInTheJsonObj);
-
-            // iterate through the key : value pairs found
-            for (String entryKey : mapWithStringVals.keySet()) {
-                if (key.equalsIgnoreCase("market_data")) {
-
-                    // break after setting the map entries - only need the value from the usd, btc, eth and bnb key
-                    keyValuePairs.put("usd", mapWithStringVals.get("usd"));
-                    keyValuePairs.put("btc", mapWithStringVals.get("btc"));
-                    keyValuePairs.put("eth", mapWithStringVals.get("eth"));
-                    keyValuePairs.put("bnb", mapWithStringVals.get("bnb"));
-                    break;
-
-                } else if (key.equalsIgnoreCase("market_cap") || key.equalsIgnoreCase("total_volume")) {
-
-                    // break after setting the map entry - only need the value from the usd key
-                    keyValuePairs.put(key, mapWithStringVals.get("usd"));
-                    break;
-
-                } else {
-
-                    keyValuePairs.put(entryKey, mapWithStringVals.get(entryKey));
-                }
-            }
-
-        }
-
-        return toCoinHistoryFromMap(keyValuePairs);
-
-    }
-
-    /*==========   HELPER METHODS FOR CREATING OBJECTS  =================*/
-
-
-    /* Retrieves the current price history
-    * */
-    private PriceHistoryDTO toPriceHistoryFromMap(Map<String, String> mapEntry) {
-        return new PriceHistoryDTO.Builder(mapEntry.get("id"))
-                .withPrice(toDouble(mapEntry.get("usd")))
-                .withMarketCap(toDouble(mapEntry.get("usd_market_cap")))
-                .withTotalVolume24Hr(toDouble(mapEntry.get("usd_24h_vol")))
-                .withTotalVolume24HrChange(toDouble(mapEntry.get("usd_24h_change")))
-                .withDateAndTime(mapEntry.get("last_updated_at"))
-                .build();
-    }
-
-    /* Retrieves the historical price history
-    * */
-    private CoinHistoryDTO toCoinHistoryFromMap(Map<String, String> mapEntry) {
-        return new CoinHistoryDTO.Builder(mapEntry.get("id"))
-                .withSymbol(mapEntry.get("symbol"))
-                .withName(mapEntry.get("name"))
-                .withImages(mapEntry.get("small") + "," + mapEntry.get("thumb"))
-                .withUsdPrice(toDouble(mapEntry.get("usd")))
-                .withBtcPrice(toDouble(mapEntry.get("btc")))
-                .withEthPrice(toDouble(mapEntry.get("eth")))
-                .withBnbPrice(toDouble(mapEntry.get("bnb")))
-                .withTotalVolume(toDouble(mapEntry.get("total_volume")))
-                .withMarketCap(toDouble(mapEntry.get("market_cap")))
-                .withDateTime(mapEntry.get("date_time"))
-                .build();
+    public <T extends Param> JHistoryCoinDTO getCoinHistory(T paramConfigObj, ObjectMapper objectMapper) throws IOException {
+        return objectMapper.readValue(getApiResource(paramConfigObj), JHistoryCoinDTO.class);
     }
 
 }

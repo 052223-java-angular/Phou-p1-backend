@@ -1,5 +1,6 @@
-package com.revature.yield.api.configs;
+package com.revature.yield.api.dtos.coin.simple_price;
 
+import com.revature.yield.api.dtos.Param;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

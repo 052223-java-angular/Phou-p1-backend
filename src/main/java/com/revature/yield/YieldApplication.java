@@ -1,13 +1,13 @@
 package com.revature.yield;
 
-import com.revature.yield.api.configs.CoinHistoryParam;
-import com.revature.yield.api.dtos.CoinHistoryDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.revature.yield.api.dtos.coin.simple_price.SimplePriceParam;
+import com.revature.yield.api.dtos.coin.simple_price.JPriceSimpleDTO;
 import com.revature.yield.api.service.CoinGeckoService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 import static java.lang.System.out;
 
@@ -20,11 +20,18 @@ public class YieldApplication {
 
 		try {
 
-//			List<PriceHistoryDTO> priceHistoryList = cgService.getSimplePrice(new SimplePriceParam(new String[]{"near", "bitcoin"}, new String[]{"usd"}));
-//			priceHistoryList.forEach(entry -> out.println(entry.toString()));
+			JPriceSimpleDTO priceHistoryList = cgService.getSimplePrice(
+					new SimplePriceParam(new String[]{"near", "bitcoin"}, new String[]{"usd"}),
+					new ObjectMapper());
+			priceHistoryList.entrySet().forEach(out::println);
 
-			CoinHistoryDTO coinHistoryDTO = cgService.getCoinHistory(new CoinHistoryParam("near", LocalDateTime.of(2020, 11, 11, 2, 44, 0)));
-			out.println(coinHistoryDTO.toString());
+//			JHistoryCoinDTO coinHistoryDTO = cgService.getCoinHistory(
+//					new CoinHistoryParam("near", LocalDateTime.of(2020, 11, 11, 2, 44, 0)),
+//					new ObjectMapper());
+//			out.println(coinHistoryDTO.toString());
+
+//			JCoinDTO jCoinDTO = cgService.getCoinById(new CoinParam("near"), new ObjectMapper());
+//			out.println(jCoinDTO);
 
 		} catch (IOException e) {
 			out.println(e.getLocalizedMessage());

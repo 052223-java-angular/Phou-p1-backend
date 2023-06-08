@@ -1,5 +1,6 @@
-package com.revature.yield.api.configs;
+package com.revature.yield.api.dtos.coin.history;
 
+import com.revature.yield.api.dtos.Param;
 import lombok.Getter;
 import lombok.Setter;
 

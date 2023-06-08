@@ -1,12 +1,12 @@
-package com.revature.yield.api.configs;
+package com.revature.yield.api.dtos.coin.id;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import com.revature.yield.api.dtos.Param;
+import lombok.*;
 
 import static java.lang.String.format;
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 public class CoinParam extends Param {
@@ -41,8 +41,13 @@ public class CoinParam extends Param {
      */
     private boolean sparkline = false;
 
+
+    public CoinParam(String id) {
+        this.id = id;
+    }
+
     public String toString() {
-        return format("%s?localization=%s&tickers=%s&market_data=%s&community_data=%s&developer_data=%s&sparkline=%s",
+        return format("coins/%s?localization=%s&tickers=%s&market_data=%s&community_data=%s&developer_data=%s&sparkline=%s",
                 id, localization, tickers, market_data, community_data, developer_data, sparkline);
     }
 
