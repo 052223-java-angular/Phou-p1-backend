@@ -40,9 +40,9 @@ public class Coin implements Serializable {
     @JsonBackReference
     private MarketData marketData;
 
-//    @ManyToOne
-//    @JoinColumn(name = "price_history_id")
-//    @JsonBackReference
-//    private Set<PriceHistory> priceHistories;
+    @ManyToOne
+    @JoinColumn(name = "price_history_id")
+    @JsonBackReference
+    private PriceHistory priceHistories;
 
 }

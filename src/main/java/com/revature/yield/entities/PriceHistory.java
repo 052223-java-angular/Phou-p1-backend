@@ -15,8 +15,8 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-//@Entity
-//@Table(name = "price_history")
+@Entity
+@Table(name = "price_history")
 public class PriceHistory implements Serializable {
 
     @Id
@@ -28,7 +28,7 @@ public class PriceHistory implements Serializable {
     private double totalVolume;
     private String snapshot_date;
 
-    @OneToMany(mappedBy = "coin", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "priceHistories", fetch = FetchType.LAZY)
     @JsonManagedReference
     private Set<Coin> coins;
 
