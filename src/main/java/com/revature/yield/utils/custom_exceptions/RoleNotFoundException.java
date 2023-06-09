@@ -1,4 +1,4 @@
-package com.revature.yield.utils;
+package com.revature.yield.utils.custom_exceptions;
 
 public class RoleNotFoundException extends RuntimeException {
 
