@@ -2,10 +2,7 @@ package com.revature.yield.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.UUID;
@@ -14,14 +11,14 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "trades")
-public class Trades implements Serializable {
+public class Trade implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
-
     private String reportDate;
     private String reportId;
     private String buyValue;
@@ -33,6 +30,12 @@ public class Trades implements Serializable {
     private String buyDate;
     private String sellDate;
     private String pAndI;
+
+    // new fields - update erd
+    private String orderId;
+    private String assetName;
+    private String unitPrice;
+    private String currencyPair;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

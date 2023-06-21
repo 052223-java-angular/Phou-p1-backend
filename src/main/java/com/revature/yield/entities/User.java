@@ -37,7 +37,7 @@ public class User implements Serializable {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonManagedReference
-    private Set<Trades> trades;
+    private Set<Trade> trades;
 
     public User(String username, String password, Role role) {
         this.id = UUID.randomUUID();

@@ -2,7 +2,7 @@ package com.revature.yield.services;
 
 import com.revature.yield.dtos.request.NewRoleRequest;
 import com.revature.yield.entities.Role;
-import com.revature.yield.repositories.RoleRepository;
+import com.revature.yield.repositories.IRoleRepository;
 import com.revature.yield.utils.custom_exceptions.RoleNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import static java.lang.String.format;
 @Service
 @AllArgsConstructor
 public class RoleService {
-    private final RoleRepository roleRepo;
+    private final IRoleRepository roleRepo;
 
     /**
      * Saves a new role based on the provided information.

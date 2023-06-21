@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+@CrossOrigin
 @RestController
 @AllArgsConstructor
 @RequestMapping("/auth")
@@ -28,6 +30,7 @@ public class AuthController {
      */
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody NewUserRequest request) {
+        System.out.println("Registering user");
         // if username is not valid, throw exception
         if (!userService.isValidUsername(request.getUsername())) {
             throw new ResourceConflictException(

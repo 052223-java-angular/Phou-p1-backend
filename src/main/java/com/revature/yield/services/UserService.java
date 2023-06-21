@@ -5,7 +5,7 @@ import com.revature.yield.dtos.request.NewUserRequest;
 import com.revature.yield.dtos.response.Principal;
 import com.revature.yield.entities.Role;
 import com.revature.yield.entities.User;
-import com.revature.yield.repositories.UserRepository;
+import com.revature.yield.repositories.IUserRepository;
 import com.revature.yield.utils.custom_exceptions.InvalidCredentialException;
 import lombok.AllArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
@@ -13,10 +13,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static java.lang.System.out;
+
 @Service
 @AllArgsConstructor
 public class UserService {
-    private final UserRepository userRepo;
+    private final IUserRepository userRepo;
     private final RoleService roleService;
 
     /**
@@ -39,7 +41,9 @@ public class UserService {
         return userRepo.save(newUser);
     }
 
-    public Principal login(NewLoginRequest request) {
+    public Principal login(NewLoginRequest request) throws InvalidCredentialException {
+
+        out.println(request.getUsername());
         Optional<User> userOpt = userRepo.findByUsername(request.getUsername());
 
         if (userOpt.isPresent()) {
@@ -49,7 +53,7 @@ public class UserService {
             }
         }
 
-        throw new InvalidCredentialException("Invalid credential");
+        throw new InvalidCredentialException("Invalid username and / or password");
     }
 
     /**
@@ -59,7 +63,7 @@ public class UserService {
      * @return true if the username is valid, false otherwise
      */
     public boolean isValidUsername(String username) {
-        return username.matches("^(?=[a-zA-Z0-9._]{8,20}$)(?!.*[_.]{2})[^_.].*[^_.]$");
+        return username.matches("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^-]+(?:\\.[a-zA-Z0-9_!#$%&'*+/=?`{|}~^-]+)*@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$");
     }
 
     /**
@@ -80,7 +84,7 @@ public class UserService {
      * @return true if the password is valid, false otherwise
      */
     public boolean isValidPassword(String password) {
-        return password.matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$");
+        return password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{8,20}$");
     }
 
     /**
