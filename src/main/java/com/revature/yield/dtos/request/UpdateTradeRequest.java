@@ -11,7 +11,7 @@ import java.util.UUID;
 @Getter
 @Builder
 @AllArgsConstructor
-public class UpdateTradeRequest {
+public class UpdateTradeRequest extends Request {
 
 
     private UUID id;

@@ -1,13 +1,16 @@
 package com.revature.yield.services;
 
 import com.revature.yield.dtos.request.SaveTradeRequest;
+import com.revature.yield.dtos.request.UpdateTradeRequest;
 import com.revature.yield.entities.Trade;
 import com.revature.yield.entities.User;
 import com.revature.yield.repositories.ITradeRecordRepository;
 import com.revature.yield.repositories.IUserRepository;
 import com.revature.yield.utils.custom_exceptions.UnauthorizedException;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,6 +18,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Service
+@Transactional
 @AllArgsConstructor
 public class TradeRecordService {
     private final ITradeRecordRepository tradeRecordRepository;
@@ -37,9 +41,12 @@ public class TradeRecordService {
 
     /* gets all trade records matching the user id
     * */
-    public List<Trade> getTradeRecords(String userId) {
-        return tradeRecordRepository.findAllByUserId(UUID.fromString(userId));
+    public List<Trade> getTradeRecords(String userId, String recordId) {
+        if (recordId == null)
+            return tradeRecordRepository.findAllByUserId(UUID.fromString(userId));
+        return tradeRecordRepository.findAllByIdAndUserId(UUID.fromString(recordId), UUID.fromString(userId));
     }
+
 
     /* gets all trade report ids for the matched user id
      * */
@@ -49,40 +56,41 @@ public class TradeRecordService {
                     .getId());
     }
 
-    public Set<Trade> updateTradeRecord(UUID userId ) {
+    public Trade updateTradeRecord(UUID userId, UpdateTradeRequest updateTradeRequest) {
+        User foundUser = userRepository.findById(userId)
+                .orElseThrow(() -> new UnauthorizedException("User account not found, unable to save trade records."));
 
-
-//        return tradeRecordRepository.updateTradeRecord();
-        return null;
+        updateTradeRequest.setUser(foundUser);
+        Trade trade = new Trade();
+        BeanUtils.copyProperties(updateTradeRequest, trade);
+        return tradeRecordRepository.saveAndFlush(trade);
     }
 
-    public int deleteTradeRecord(UUID tradeRecordId) {
-        tradeRecordRepository.deleteById(tradeRecordId)
-        return 1;
+    // delete a trade record by its id and then returns the count
+    public int deleteTradeRecordById(UUID id) {
+        return tradeRecordRepository.deleteByIdReturnCount(id);
     }
-
-
 
 
     /* used for translating request fields into a Trade java object
     * */
-    private Trade fromSaveTradeReqToTrade(SaveTradeRequest saveTradeRequest, User foundUser, UUID reportId, String side) {
+    private Trade fromSaveTradeReqToTrade(SaveTradeRequest tradeRequest, User foundUser, UUID reportId, String side) {
         return Trade.builder()
                 .id(UUID.randomUUID())
                 .reportDate(LocalDateTime.now().toString())
                 .reportId(reportId.toString())
-                .buyDate(side.equalsIgnoreCase("buy") ? saveTradeRequest.getDate() : LocalDateTime.MIN.toString())
-                .sellDate(side.equalsIgnoreCase("buy") ? LocalDateTime.MIN.toString() : saveTradeRequest.getDate())
-                .buyValue(side.equalsIgnoreCase("buy") ? saveTradeRequest.getAmountPaid() : "0")
-                .sellValue(side.equalsIgnoreCase("buy") ? "0" : saveTradeRequest.getAmountPaid())
-                .buyFee(side.equalsIgnoreCase("buy") ? saveTradeRequest.getFee() : "0")
-                .sellFee(side.equalsIgnoreCase("buy") ? "0" : saveTradeRequest.getFee())
-                .boughtQty(side.equalsIgnoreCase("buy") ? saveTradeRequest.getQty() : "0")
-                .soldQty(side.equalsIgnoreCase("buy") ? "0" : saveTradeRequest.getQty())
-                .assetName(saveTradeRequest.getAsset())
-                .orderId(saveTradeRequest.getOrderId())
-                .unitPrice(saveTradeRequest.getUnitPrice())
-                .currencyPair(saveTradeRequest.getCurrencyPair())
+                .buyDate(side.equalsIgnoreCase("buy") ? tradeRequest.getDate() : LocalDateTime.MIN.toString())
+                .sellDate(side.equalsIgnoreCase("buy") ? LocalDateTime.MIN.toString() : tradeRequest.getDate())
+                .buyValue(side.equalsIgnoreCase("buy") ? tradeRequest.getAmountPaid() : "0")
+                .sellValue(side.equalsIgnoreCase("buy") ? "0" : tradeRequest.getAmountPaid())
+                .buyFee(side.equalsIgnoreCase("buy") ? tradeRequest.getFee() : "0")
+                .sellFee(side.equalsIgnoreCase("buy") ? "0" : tradeRequest.getFee())
+                .boughtQty(side.equalsIgnoreCase("buy") ? tradeRequest.getQty() : "0")
+                .soldQty(side.equalsIgnoreCase("buy") ? "0" : tradeRequest.getQty())
+                .assetName(tradeRequest.getAsset())
+                .orderId(tradeRequest.getOrderId())
+                .unitPrice(tradeRequest.getUnitPrice())
+                .currencyPair(tradeRequest.getCurrencyPair())
                 .user(foundUser)
                 .build();
     }

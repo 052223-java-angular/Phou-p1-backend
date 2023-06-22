@@ -36,16 +36,38 @@ public class TradeRecordController {
                 .body(tradeRecordService.saveTradeRecords(saveTradesRequest, UUID.fromString(userId)));
     }
 
-    /* for getting the trade record of users, all, by asset name, date range
+    /* for getting the trade record of users all or
     * */
     @GetMapping("/records")
-    public ResponseEntity<?> getTradeRecords(@RequestHeader("auth_token") String authToken) {
+    public ResponseEntity<?> getTradeRecords(@RequestHeader("auth_token") String authToken,
+                                             @RequestParam(value = "recordId", required = false) String recordId) {
 
         String userId = jwtTokenService.extractUserId(authToken);
         out.println("getTradeRecords() :: getting trade records for user_id: "+userId);
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(tradeRecordService.getTradeRecords(userId));
+                .body(tradeRecordService.getTradeRecords(userId, recordId));
+    }
+
+    /* for getting the trade record by asset name, price, profit and loss by date range
+     * */
+    @GetMapping("/records/search")
+    public ResponseEntity<?> getTradeRecordsBy(@RequestHeader("auth_token") String authToken,
+                                             @RequestParam(value = "profit", required = false) String profit,
+                                             @RequestParam(value = "loss", required = false) String loss,
+                                             @RequestParam(value = "name", required = false) String name,
+                                             @RequestParam(value = "price", required = false) String price,
+                                             @RequestParam(value = "from", required = false) String from,
+                                             @RequestParam(value = "to", required = false) String to) {
+
+        // todo implement switch logic
+
+
+        String userId = jwtTokenService.extractUserId(authToken);
+        out.println("getTradeRecords() :: getting trade records for user_id: "+userId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(tradeRecordService.getTradeRecords(userId, ""));
     }
 
     /* for getting reports id
@@ -68,26 +90,27 @@ public class TradeRecordController {
 
         String userId = jwtTokenService.extractUserId(authToken);
 
-
-        // todo impl
         out.println("updateTradeRecords() :: update trade report by id: "+userId);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(tradeRecordService.updateTradeRecord(UUID.fromString(userId)));
+                .body(tradeRecordService.updateTradeRecord(UUID.fromString(userId), updateTradeRequest));
     }
 
     /* for deleting records
     * */
-    @DeleteMapping("/records/{tradeId}")
+    @DeleteMapping("/records")
     public ResponseEntity<?> deleteTradeRecords(@RequestHeader("auth_token") String authToken,
-                                                @RequestParam("tradeId") UUID tradeId) {
+                                                @RequestParam("trade_record_id") String tradeRecordId) {
 
+        UUID tradeId = UUID.fromString(tradeRecordId);
+
+        // extract user id
         String userId = jwtTokenService.extractUserId(authToken);
         if (userId.equals(""))
             throw new InvalidCredentialException("Invalid auth token; login and try again.");
 
-        out.println("updateTradeRecords() :: update trade report by id: "+userId);
+        out.println("updateTradeRecords() :: update trade report by id: "+tradeRecordId);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(tradeRecordService.deleteTradeRecord(tradeId));
+                .body(tradeRecordService.deleteTradeRecordById(tradeId));
     }
 
 }
