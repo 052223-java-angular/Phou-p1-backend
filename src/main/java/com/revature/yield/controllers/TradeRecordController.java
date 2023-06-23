@@ -39,10 +39,12 @@ public class TradeRecordController {
     /* for getting the trade record of users all or
     * */
     @GetMapping("/records")
-    public ResponseEntity<?> getTradeRecords(@RequestHeader("auth_token") String authToken,
+    public ResponseEntity<?> getTradeRecords(
+//            @RequestHeader("auth_token") String authToken,
                                              @RequestParam(value = "recordId", required = false) String recordId) {
 
-        String userId = jwtTokenService.extractUserId(authToken);
+        String userId = "3ebceae4-c5fa-4fb1-92c5-1ae637c7cdf4";
+//        String userId = jwtTokenService.extractUserId(authToken);
         out.println("getTradeRecords() :: getting trade records for user_id: "+userId);
 
         return ResponseEntity.status(HttpStatus.OK)

@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface IUserRepository extends JpaRepository<User, UUID> {
+public interface IUserRepo extends JpaRepository<User, UUID> {
 
     /**
      * Finds a user by username.

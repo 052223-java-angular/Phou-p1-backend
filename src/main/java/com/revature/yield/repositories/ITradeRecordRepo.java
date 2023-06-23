@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Repository
-public interface ITradeRecordRepository extends JpaRepository<Trade, UUID> {
+public interface ITradeRecordRepo extends JpaRepository<Trade, UUID> {
 
     List<Trade> findAllByUserId(UUID userId);
 

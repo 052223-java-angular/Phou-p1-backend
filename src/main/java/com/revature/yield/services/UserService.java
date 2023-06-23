@@ -5,7 +5,7 @@ import com.revature.yield.dtos.request.NewUserRequest;
 import com.revature.yield.dtos.response.Principal;
 import com.revature.yield.entities.Role;
 import com.revature.yield.entities.User;
-import com.revature.yield.repositories.IUserRepository;
+import com.revature.yield.repositories.IUserRepo;
 import com.revature.yield.utils.custom_exceptions.InvalidCredentialException;
 import lombok.AllArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
@@ -18,7 +18,7 @@ import static java.lang.System.out;
 @Service
 @AllArgsConstructor
 public class UserService {
-    private final IUserRepository userRepo;
+    private final IUserRepo userRepo;
     private final RoleService roleService;
 
     /**

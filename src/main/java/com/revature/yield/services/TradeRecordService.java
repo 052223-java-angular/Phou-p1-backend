@@ -4,8 +4,8 @@ import com.revature.yield.dtos.request.SaveTradeRequest;
 import com.revature.yield.dtos.request.UpdateTradeRequest;
 import com.revature.yield.entities.Trade;
 import com.revature.yield.entities.User;
-import com.revature.yield.repositories.ITradeRecordRepository;
-import com.revature.yield.repositories.IUserRepository;
+import com.revature.yield.repositories.ITradeRecordRepo;
+import com.revature.yield.repositories.IUserRepo;
 import com.revature.yield.utils.custom_exceptions.UnauthorizedException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -21,8 +21,8 @@ import java.util.UUID;
 @Transactional
 @AllArgsConstructor
 public class TradeRecordService {
-    private final ITradeRecordRepository tradeRecordRepository;
-    private final IUserRepository userRepository;
+    private final ITradeRecordRepo tradeRecordRepository;
+    private final IUserRepo userRepository;
 
     /* creates trade records from the save trade request
     * */
@@ -36,6 +36,10 @@ public class TradeRecordService {
                 .stream()
                 .map(trade -> fromSaveTradeReqToTrade(trade, foundUser, reportId, trade.getSide()))
                 .toList();
+
+        // todo call service to run report
+
+
         return tradeRecordRepository.saveAll(tradeList);
     }
 
@@ -79,19 +83,38 @@ public class TradeRecordService {
                 .id(UUID.randomUUID())
                 .reportDate(LocalDateTime.now().toString())
                 .reportId(reportId.toString())
-                .buyDate(side.equalsIgnoreCase("buy") ? tradeRequest.getDate() : LocalDateTime.MIN.toString())
-                .sellDate(side.equalsIgnoreCase("buy") ? LocalDateTime.MIN.toString() : tradeRequest.getDate())
-                .buyValue(side.equalsIgnoreCase("buy") ? tradeRequest.getAmountPaid() : "0")
-                .sellValue(side.equalsIgnoreCase("buy") ? "0" : tradeRequest.getAmountPaid())
-                .buyFee(side.equalsIgnoreCase("buy") ? tradeRequest.getFee() : "0")
-                .sellFee(side.equalsIgnoreCase("buy") ? "0" : tradeRequest.getFee())
-                .boughtQty(side.equalsIgnoreCase("buy") ? tradeRequest.getQty() : "0")
-                .soldQty(side.equalsIgnoreCase("buy") ? "0" : tradeRequest.getQty())
                 .assetName(tradeRequest.getAsset())
+                .currencyPair(tradeRequest.getCurrencyPair())
+                .side(tradeRequest.getSide())
+                .addDate(LocalDateTime.now().toString())
+                .date( tradeRequest.getDate())
+                .amount(tradeRequest.getAmountPaid())
+                .fee(tradeRequest.getFee())
+                .qty(tradeRequest.getQty())
                 .orderId(tradeRequest.getOrderId())
                 .unitPrice(tradeRequest.getUnitPrice())
-                .currencyPair(tradeRequest.getCurrencyPair())
                 .user(foundUser)
                 .build();
+
+//        return Trade.builder()
+//                .id(UUID.randomUUID())
+//                .reportDate(LocalDateTime.now().toString())
+//                .reportId(reportId.toString())
+//                .addDate(LocalDateTime.now().toString())
+//                .buyDate(side.equalsIgnoreCase("buy") ? tradeRequest.getDate() : LocalDateTime.MIN.toString())
+//                .sellDate(side.equalsIgnoreCase("buy") ? LocalDateTime.MIN.toString() : tradeRequest.getDate())
+//                .buyAmount(side.equalsIgnoreCase("buy") ? tradeRequest.getAmountPaid() : "0")
+//                .sellAmount(side.equalsIgnoreCase("buy") ? "0" : tradeRequest.getAmountPaid())
+//                .buyFee(side.equalsIgnoreCase("buy") ? tradeRequest.getFee() : "0")
+//                .sellFee(side.equalsIgnoreCase("buy") ? "0" : tradeRequest.getFee())
+//                .boughtQty(side.equalsIgnoreCase("buy") ? tradeRequest.getQty() : "0")
+//                .soldQty(side.equalsIgnoreCase("buy") ? "0" : tradeRequest.getQty())
+//                .assetName(tradeRequest.getAsset())
+//                .orderId(tradeRequest.getOrderId())
+//                .unitPrice(tradeRequest.getUnitPrice())
+//                .currencyPair(tradeRequest.getCurrencyPair())
+//                .side(tradeRequest.getSide())
+//                .user(foundUser)
+//                .build();
     }
 }

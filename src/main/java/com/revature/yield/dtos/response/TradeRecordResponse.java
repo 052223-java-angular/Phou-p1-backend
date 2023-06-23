@@ -7,6 +7,9 @@ import lombok.Setter;
 
 import java.util.UUID;
 
+
+/* This is the entity for storing the raw model
+* */
 @Getter
 @Setter
 @Builder
@@ -14,8 +17,8 @@ import java.util.UUID;
 public class TradeRecordResponse {
 
     private UUID id;
-    private String reportDate;
-    private String reportId;
+//    private String reportDate;
+//    private String reportId;
     private String buyValue;
     private String sellValue;
     private String buyFee;
@@ -24,7 +27,7 @@ public class TradeRecordResponse {
     private String soldQty;
     private String buyDate;
     private String sellDate;
-    private String pAndI;
+    private String addDate;
 
     // new fields - update erd
     private String orderId;
