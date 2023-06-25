@@ -50,6 +50,12 @@ public class TradeReportService {
         return tradeReportRepo.findAll();
     }
 
+    /* for deleting a profit loss record
+    * */
+    public int deleteRecordById(UUID uid) {
+        return tradeReportRepo.deleteByIdReturnCount(uid);
+    }
+
     /* for calculating profit and loss results for matched trade pairs
     * */
     private List<TradeReport>  calculateProfitLoss(List<Trade> tradeRecords,  List<TradeReport> tradeReportList, List<Trade> unmatchedBuyRecords, UUID reportId) {
@@ -163,24 +169,30 @@ public class TradeReportService {
     }
 
 
-    private double simpleProfitOrLoss(List<Trade> trades) {
-        double totalBuyAmount = 0;
-        double totalSellAmount = 0;
-        double totalBuyFee = 0;
-        double totalSellFee = 0;
+    private double singleAssetProfitLoss(List<Trade> trades) {
+        BigDecimal totalBuyAmount = new BigDecimal(0);
+        BigDecimal totalSellAmount = new BigDecimal(0);
+        BigDecimal totalBuyFee = new BigDecimal(0);
+        BigDecimal totalSellFee = new BigDecimal(0);
 
         for (Trade trade : trades) {
+            BigDecimal amount = new BigDecimal(trade.getAmount());
+            BigDecimal fee = new BigDecimal(trade.getFee());
             if (trade.getSide().equals("buy")) {
-                totalBuyAmount += Double.parseDouble(trade.getAmount());
-                totalBuyFee += Double.parseDouble(trade.getFee());
+                totalBuyAmount = totalBuyAmount.add(amount);
+                totalBuyFee = totalBuyFee.add(fee);
             } else if (trade.getSide().equals("sell")) {
-                totalSellAmount += Double.parseDouble(trade.getAmount());
-                totalSellFee += Double.parseDouble(trade.getFee());
+                totalSellAmount = totalSellAmount.add(amount);
+                totalSellFee = totalSellFee.add(fee);
             }
         }
 
-        double netProfitOrLoss = totalSellAmount - totalBuyAmount - totalBuyFee - totalSellFee;
-        return netProfitOrLoss;
+        return totalSellAmount
+                .subtract(totalBuyAmount)
+                .subtract(totalBuyFee)
+                .subtract(totalSellFee)
+                .setScale(4, RoundingMode.HALF_DOWN)
+                .doubleValue();
     }
 
 }
