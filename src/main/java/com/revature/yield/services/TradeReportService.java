@@ -2,8 +2,11 @@ package com.revature.yield.services;
 
 import com.revature.yield.entities.Trade;
 import com.revature.yield.entities.TradeReport;
+import com.revature.yield.entities.User;
 import com.revature.yield.repositories.ITradeRecordRepo;
 import com.revature.yield.repositories.ITradeReportRepo;
+import com.revature.yield.repositories.IUserRepo;
+import com.revature.yield.utils.custom_exceptions.InvalidCredentialException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,36 +22,57 @@ import java.util.*;
 public class TradeReportService {
 
     private final ITradeReportRepo tradeReportRepo;
-
+    private final IUserRepo userRepo;
     private final ITradeRecordRepo tradeRecordRepo;
 
-    public Set<TradeReport> getTradeReports() {
+    public Set<TradeReport> getTradeReports(String userId, String reportId, String assetId, String assetName, String reportType, String currency) {
+
+        // todo impl
+        switch (reportType) {
+            case "profit":
+                break;
+            case "loss":
+                break;
+            case "traded_most":
+                break;
+            default:
+                break;
+        }
 
         // todo impl
         return null;
     }
 
 
-    public List<TradeReport> saveTradeReport(
-            String userId, String reportId, String assetId, String assetName, String reportType, String currency) {
+    public List<TradeReport> runAndSaveProfitLossReport(UUID userId) {
 
+        Optional<User> userOpt = userRepo.findById(userId);
 
-        // todo impl
-        List<TradeReport> tradeReportList = calculateProfitLoss();
+        // throw error
+        if (userOpt.isEmpty()) {
+            throw new InvalidCredentialException("Invalid userid, maybe login or try without an auth-token");
+        }
+        List<Trade> unmatchedBuyRecords = new ArrayList<>();
+        List<TradeReport> tradeReportList = new ArrayList<>();
+        UUID reportId = UUID.randomUUID();
+        tradeReportList = calculateProfitLoss(tradeRecordRepo.findAllByUserId(userOpt.get().getId()), tradeReportList, unmatchedBuyRecords, reportId);
+
+        // add user to trade report object and then save
+        tradeReportList.forEach(e -> e.setUser(userOpt.get()));
         tradeReportRepo.saveAll(tradeReportList);
         return tradeReportRepo.findAll();
     }
-
-    public List<TradeReport> calculateProfitLoss() {
-        // find all records, then calculate profit and loss
-        if (true) {
-            List<Trade> unmatchedBuyRecords = new ArrayList<>();
-            List<TradeReport> tradeReportList = new ArrayList<>();
-            UUID reportId = UUID.randomUUID();
-            return calculateProfitLoss(tradeRecordRepo.findAll(), tradeReportList, unmatchedBuyRecords, reportId);
-        }
-        return tradeReportRepo.findAll();
-    }
+//
+//    public List<TradeReport> calculateProfitLoss(String userId) {
+//        // find all records, then calculate profit and loss
+//        if (true) {
+//            List<Trade> unmatchedBuyRecords = new ArrayList<>();
+//            List<TradeReport> tradeReportList = new ArrayList<>();
+//            UUID reportId = UUID.randomUUID();
+//            return calculateProfitLoss(tradeRecordRepo.findAll(), tradeReportList, unmatchedBuyRecords, reportId);
+//        }
+//        return tradeReportRepo.findAll();
+//    }
 
     /* for deleting a profit loss record
     * */
@@ -58,7 +82,7 @@ public class TradeReportService {
 
     /* for calculating profit and loss results for matched trade pairs
     * */
-    private List<TradeReport>  calculateProfitLoss(List<Trade> tradeRecords,  List<TradeReport> tradeReportList, List<Trade> unmatchedBuyRecords, UUID reportId) {
+    public List<TradeReport>  calculateProfitLoss(List<Trade> tradeRecords,  List<TradeReport> tradeReportList, List<Trade> unmatchedBuyRecords, UUID reportId) {
         Map<String, List<Trade>> buyRecordsMap = new HashMap<>();
 
         // iterate through the tradeRecords
@@ -106,7 +130,7 @@ public class TradeReportService {
                                     .id(UUID.randomUUID())
                                     .reportDate(LocalDateTime.now().toString())
                                     .reportId(reportId.toString())
-                                    .assetName(assetName)
+                                    .assetName(thisRecord.getAssetName())
                                     .currencyPair(currencyPair)
                                     .qty(quantity.toString())
                                     .amount(sellAmount.setScale(4, RoundingMode.HALF_DOWN).toString())
@@ -164,7 +188,7 @@ public class TradeReportService {
 //            System.out.println("-----------------------------------------");
 //        }
 
-        tradeReportList.sort((a, b) -> a.getAssetName().compareTo(b.getAssetName()));
+        tradeReportList.sort(Comparator.comparing(TradeReport::getAssetName));
         return tradeReportList;
     }
 
