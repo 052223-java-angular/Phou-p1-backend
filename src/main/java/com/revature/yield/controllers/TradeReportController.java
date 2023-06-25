@@ -5,9 +5,9 @@ import com.revature.yield.services.TradeReportService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/trades/reports")
@@ -18,14 +18,27 @@ public class TradeReportController {
 
     private final TradeReportService tradeReportService;
 
-    @GetMapping
-    public ResponseEntity<?> getTradeReports() {
+    @GetMapping("/pl")
+    public ResponseEntity<?> getTradeReports(
+        @RequestHeader(value = "auth_token", required = false) String authToken,
+        @RequestParam(value = "report_id", required = false) UUID reportId,
+        @RequestParam(value = "asset_id", required = false) String assetId,
+        @RequestParam(value = "asset_name", required = false) String assetName,
+        @RequestParam(value = "report_type", required = false) String reportType,
+        @RequestParam(value = "currency", required = false) String currency
+    ) {
 
-//        String userId = jwtTokenService.extractUserId(authToken);
-        String userId = "3ebceae4-c5fa-4fb1-92c5-1ae637c7cdf4";
+        // allow calculation when no user token is present
+        if (authToken == null) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(tradeReportService.calculateProfitLoss());
+        }
 
 
-        return ResponseEntity.status(HttpStatus.OK).body(tradeReportService.calculateProfitLoss());
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(tradeReportService.saveTradeReport(
+                        jwtTokenService.extractUserId(authToken),
+                        "", "", "", "", ""));
     }
 
 }

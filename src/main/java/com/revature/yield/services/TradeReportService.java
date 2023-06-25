@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -28,23 +29,31 @@ public class TradeReportService {
     }
 
 
-    public void saveTradeReport() {
+    public List<TradeReport> saveTradeReport(
+            String userId, String reportId, String assetId, String assetName, String reportType, String currency) {
+
 
         // todo impl
+        List<TradeReport> tradeReportList = calculateProfitLoss();
+        tradeReportRepo.saveAll(tradeReportList);
+        return tradeReportRepo.findAll();
     }
 
     public List<TradeReport> calculateProfitLoss() {
-        List<TradeReport> tradeReportList = calculateProfitLoss(tradeRecordRepo.findAll());
-        return tradeReportRepo.saveAll(tradeReportList);
+        // find all records, then calculate profit and loss
+        if (true) {
+            List<Trade> unmatchedBuyRecords = new ArrayList<>();
+            List<TradeReport> tradeReportList = new ArrayList<>();
+            UUID reportId = UUID.randomUUID();
+            return calculateProfitLoss(tradeRecordRepo.findAll(), tradeReportList, unmatchedBuyRecords, reportId);
+        }
+        return tradeReportRepo.findAll();
     }
 
     /* for calculating profit and loss results for matched trade pairs
     * */
-    public List<TradeReport>  calculateProfitLoss(List<Trade> tradeRecords) {
+    private List<TradeReport>  calculateProfitLoss(List<Trade> tradeRecords,  List<TradeReport> tradeReportList, List<Trade> unmatchedBuyRecords, UUID reportId) {
         Map<String, List<Trade>> buyRecordsMap = new HashMap<>();
-        List<Trade> unmatchedBuyRecords = new ArrayList<>();
-        List<TradeReport> tradeReportList = new ArrayList<>();
-        UUID reportId = UUID.randomUUID();
 
         // iterate through the tradeRecords
         for (Trade thisRecord : tradeRecords) {
@@ -62,65 +71,91 @@ public class TradeReportService {
             } else if (side.equals("sell")) {
                 String key = assetName + currencyPair;
                 List<Trade> buyRecords = buyRecordsMap.getOrDefault(key, new ArrayList<>());
-                boolean matchFound = false;
+                BigDecimal remainingQuantity = quantity;
 
                 for (Trade buyRecord : buyRecords) {
                     BigDecimal buyQuantity = new BigDecimal(buyRecord.getQty());
 
                     // Match based on asset name, currency pair, and quantity
-                    if (buyQuantity.compareTo(quantity) >= 0) {
+                    if (buyQuantity.compareTo(BigDecimal.ZERO) > 0 && remainingQuantity.compareTo(BigDecimal.ZERO) > 0) {
                         BigDecimal buyAmount = new BigDecimal(buyRecord.getAmount());
                         BigDecimal sellAmount = new BigDecimal(thisRecord.getAmount());
                         BigDecimal buyFee = new BigDecimal(buyRecord.getFee());
                         BigDecimal sellFee = new BigDecimal(thisRecord.getFee());
                         BigDecimal buyTotal = buyAmount.add(buyFee).add(sellFee);
                         BigDecimal profitLoss = sellAmount.subtract(buyTotal);
+                        BigDecimal feeTotal = buyFee.add(sellFee);
+                        BigDecimal unitPrice = profitLoss.subtract(sellAmount).divide(quantity, RoundingMode.CEILING).abs();
+                        BigDecimal cost = unitPrice.multiply(quantity);
 
-                        String date = thisRecord.getDate();
+                        if (buyQuantity.compareTo(remainingQuantity) >= 0) {
+                            // Debit sell quantity from buy quantity
+                            buyRecord.setQty(buyQuantity.subtract(remainingQuantity).toString());
+                            profitLoss = sellAmount.subtract(buyTotal.multiply(remainingQuantity.divide(buyQuantity, RoundingMode.HALF_UP)));
+                            remainingQuantity = BigDecimal.ZERO;
+                            String date = thisRecord.getDate();
 
-                        tradeReportList.add(TradeReport.builder()
-                                .id(UUID.randomUUID())
-                                .reportDate(LocalDateTime.now().toString())
-                                .reportId(reportId.toString())
-                                .assetName(assetName)
-                                .currencyPair(currencyPair)
-                                .qty(quantity.toString())
-                                .amount(sellAmount.toString())
-                                .date(date)
-                                .profitLoss(profitLoss.toString())
-                                .build());
+                            tradeReportList.add(TradeReport.builder()
+                                    .id(UUID.randomUUID())
+                                    .reportDate(LocalDateTime.now().toString())
+                                    .reportId(reportId.toString())
+                                    .assetName(assetName)
+                                    .currencyPair(currencyPair)
+                                    .qty(quantity.toString())
+                                    .amount(sellAmount.setScale(4, RoundingMode.HALF_UP).toString())
+                                    .date(date)
+                                    .fee(feeTotal.setScale(4, RoundingMode.HALF_UP).toString())
+                                    .unitPrice(unitPrice.setScale(4, RoundingMode.HALF_UP).toString())
+                                    .profitLoss(profitLoss.setScale(4, RoundingMode.HALF_UP).toString())
+                                    .costBasis(cost.setScale(4, RoundingMode.HALF_UP).toString())
+                                    .build());
+                        } else {
+                            // Debit entire buy quantity
+                            buyRecord.setQty("0");
+                            remainingQuantity = remainingQuantity.subtract(buyQuantity);
+                        }
 
                         // Remove the matched buy record to avoid duplicate matching
-                        buyRecords.remove(buyRecord);
-                        matchFound = true;
-                        break;
+                        if (remainingQuantity.compareTo(BigDecimal.ZERO) <= 0) {
+                            break; // No more sell quantity remaining
+                        }
+
                     }
                 }
 
-                if (!matchFound) {
-                    // No matching buy record found, add the sell record to unmatched records
+                if (remainingQuantity.compareTo(BigDecimal.ZERO) > 0) {
+                    // Add the unmatched sell record to unmatched records
+                    thisRecord.setQty(remainingQuantity.toString());
                     unmatchedBuyRecords.add(thisRecord);
                 }
+
             }
         }
 
+        // todo figure out how to process unmatched records
         // Process any unmatched buy records (if applicable)
-        for (Trade buyRecord : unmatchedBuyRecords) {
-            String assetName = buyRecord.getAssetName();
-            String currencyPair = buyRecord.getCurrencyPair();
-            String date = buyRecord.getDate();
-            BigDecimal amount = new BigDecimal(buyRecord.getAmount());
-            BigDecimal fee = new BigDecimal(buyRecord.getFee());
+//        Iterator<Trade> iterator = unmatchedBuyRecords.listIterator();
+//        while(iterator.hasNext()) {
+//        if (unmatchedBuyRecords.size() > 20) {
+//            calculateProfitLoss(tradeRecords, tradeReportList, unmatchedBuyRecords, reportId);
+//        }
 
-            System.out.println("Unmatched Buy Record:");
-            System.out.println("Asset: " + assetName);
-            System.out.println("Currency Pair: " + currencyPair);
-            System.out.println("Date: " + date);
-            System.out.println("buyAmount: " + amount);
-            System.out.println("buyFee: " + fee);
-            System.out.println("side: " + buyRecord.getSide());
-            System.out.println("-----------------------------------------");
-        }
+//        for (Trade buyRecord : unmatchedBuyRecords) {
+//            String assetName = buyRecord.getAssetName();
+//            String currencyPair = buyRecord.getCurrencyPair();
+//            String date = buyRecord.getDate();
+//            BigDecimal amount = new BigDecimal(buyRecord.getAmount());
+//            BigDecimal fee = new BigDecimal(buyRecord.getFee());
+
+//            System.out.println("Unmatched Buy Record:");
+//            System.out.println("Asset: " + assetName);
+//            System.out.println("Currency Pair: " + currencyPair);
+//            System.out.println("Date: " + date);
+//            System.out.println("buyAmount: " + amount);
+//            System.out.println("buyFee: " + fee);
+//            System.out.println("side: " + buyRecord.getSide());
+//            System.out.println("-----------------------------------------");
+//        }
 
         tradeReportList.sort((a, b) -> a.getAssetName().compareTo(b.getAssetName()));
         return tradeReportList;

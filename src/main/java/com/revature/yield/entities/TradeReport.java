@@ -20,6 +20,7 @@ public class TradeReport {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
+    private String date;
     private String reportDate;
     private String reportId;
     private String assetName;
@@ -27,8 +28,9 @@ public class TradeReport {
     private String currencyPair;
     private String qty;
     private String amount;
-    private String date;
+    private String fee;
     private String profitLoss;
+    private String costBasis;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
