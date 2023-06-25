@@ -85,13 +85,14 @@ public class TradeReportService {
                         BigDecimal buyTotal = buyAmount.add(buyFee).add(sellFee);
                         BigDecimal profitLoss = sellAmount.subtract(buyTotal);
                         BigDecimal feeTotal = buyFee.add(sellFee);
-                        BigDecimal unitPrice = profitLoss.subtract(sellAmount).divide(quantity, RoundingMode.CEILING).abs();
+                        BigDecimal unitPrice = profitLoss.subtract(sellAmount).divide(quantity, RoundingMode.HALF_DOWN).abs();
                         BigDecimal cost = unitPrice.multiply(quantity);
+                        unitPrice = cost.divide(quantity, RoundingMode.HALF_DOWN);
 
                         if (buyQuantity.compareTo(remainingQuantity) >= 0) {
                             // Debit sell quantity from buy quantity
                             buyRecord.setQty(buyQuantity.subtract(remainingQuantity).toString());
-                            profitLoss = sellAmount.subtract(buyTotal.multiply(remainingQuantity.divide(buyQuantity, RoundingMode.HALF_UP)));
+                            profitLoss = sellAmount.subtract(buyTotal.multiply(remainingQuantity.divide(buyQuantity, RoundingMode.HALF_DOWN)));
                             remainingQuantity = BigDecimal.ZERO;
                             String date = thisRecord.getDate();
 
@@ -102,12 +103,12 @@ public class TradeReportService {
                                     .assetName(assetName)
                                     .currencyPair(currencyPair)
                                     .qty(quantity.toString())
-                                    .amount(sellAmount.setScale(4, RoundingMode.HALF_UP).toString())
+                                    .amount(sellAmount.setScale(4, RoundingMode.HALF_DOWN).toString())
                                     .date(date)
-                                    .fee(feeTotal.setScale(4, RoundingMode.HALF_UP).toString())
-                                    .unitPrice(unitPrice.setScale(4, RoundingMode.HALF_UP).toString())
-                                    .profitLoss(profitLoss.setScale(4, RoundingMode.HALF_UP).toString())
-                                    .costBasis(cost.setScale(4, RoundingMode.HALF_UP).toString())
+                                    .fee(feeTotal.setScale(4, RoundingMode.HALF_DOWN).toString())
+                                    .unitPrice(unitPrice.setScale(4, RoundingMode.HALF_DOWN).toString())
+                                    .profitLoss(profitLoss.setScale(4, RoundingMode.HALF_DOWN).toString())
+                                    .costBasis(cost.setScale(4, RoundingMode.HALF_DOWN).toString())
                                     .build());
                         } else {
                             // Debit entire buy quantity
