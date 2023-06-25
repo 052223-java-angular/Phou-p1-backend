@@ -4,7 +4,7 @@ import com.revature.yield.api.dtos.Param;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import static java.lang.String.format;
 
@@ -20,24 +20,28 @@ public class CoinHistoryParam extends Param {
 
     /* The date of data snapshot in dd-mm-yyyy eg. 30-12-2022
      */
-    private LocalDateTime date;
+    private LocalDate localDate;
 
     /* Set to false to exclude localized languages in response
     * */
     private boolean localization = false;
 
-    public CoinHistoryParam(String id, LocalDateTime localDateTime) {
+    public CoinHistoryParam(String id, LocalDate localDate) {
         this.id = id;
-        this.date = localDateTime;
+        this.localDate = localDate;
     }
 
-    public String formatDateTime() {
-        return format("%s-%s-%s", date.getDayOfMonth(), date.getMonthValue(), date.getYear());
+    public CoinHistoryParam(String id) {
+        this.id = id;
+    }
+
+    public String formatDate() {
+        return format("%s-%s-%s", localDate.getDayOfMonth(),  localDate.getMonthValue(), localDate.getYear());
     }
 
     public String toString() {
         return format("coins/%s/history?date=%s&localization=%s",
-                id.toLowerCase(), formatDateTime(), localization);
+                id.toLowerCase(), formatDate(), localization);
     }
 
 }

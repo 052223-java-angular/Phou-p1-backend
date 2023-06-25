@@ -13,6 +13,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import static java.lang.System.out;
+
 @Service
 public class CoinGeckoService {
 
@@ -31,6 +33,7 @@ public class CoinGeckoService {
         // create url and open connection
         URL url = new URL(BASE_URI + paramConfigObj.toString());
         HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+        out.println(url.toString());
 
         // set http header - does not require an API key
         httpURLConnection.setRequestMethod("GET");
