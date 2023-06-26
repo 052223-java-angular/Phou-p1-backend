@@ -15,7 +15,9 @@ import java.util.UUID;
 
 import static java.lang.System.out;
 
-
+@CrossOrigin(origins = "http://yield-app-p1.s3-website.us-east-2.amazonaws.com/",
+        methods = {RequestMethod.GET, RequestMethod.DELETE, RequestMethod.HEAD,
+                RequestMethod.OPTIONS, RequestMethod.PUT, RequestMethod.POST})
 @RestController
 @AllArgsConstructor
 @RequestMapping("/trades")
@@ -91,7 +93,7 @@ public class TradeRecordController {
 
         String userId = jwtTokenService.extractUserId(authToken);
 
-        out.println("updateTradeRecords() :: update trade report by id: "+userId);
+        out.println("updateTradeRecords() :: update trade record by id: "+userId);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(tradeRecordService.updateTradeRecord(UUID.fromString(userId), updateTradeRequest));
     }
@@ -109,7 +111,7 @@ public class TradeRecordController {
         if (userId.equals(""))
             throw new InvalidCredentialException("Invalid auth token; login and try again.");
 
-        out.println("updateTradeRecords() :: update trade report by id: "+tradeRecordId);
+        out.println("updateTradeRecords() :: delete trade record by id: "+tradeRecordId);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(tradeRecordService.deleteTradeRecordById(tradeId));
     }

@@ -15,9 +15,9 @@ import java.util.UUID;
 
 import static java.lang.System.out;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/trades/reports")
-@AllArgsConstructor
 public class TradeReportController {
 
     private final JwtTokenService jwtTokenService;
