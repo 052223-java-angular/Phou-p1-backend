@@ -15,8 +15,11 @@ import java.util.UUID;
 
 import static java.lang.System.out;
 
-@AllArgsConstructor
+@CrossOrigin(origins = "http://yield-app-p1.s3-website.us-east-2.amazonaws.com/",
+        methods = {RequestMethod.GET, RequestMethod.DELETE, RequestMethod.HEAD,
+                RequestMethod.OPTIONS, RequestMethod.PUT, RequestMethod.POST})
 @RestController
+@AllArgsConstructor
 @RequestMapping("/trades")
 public class TradeRecordController {
 

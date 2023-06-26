@@ -16,7 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
 
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
+                registry.addMapping("v1/**")
                         .allowedOrigins(
                                 "http://yield-app-p1.s3-website.us-east-2.amazonaws.com",
                                 "http://localhost:4200")

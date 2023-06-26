@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static java.lang.System.out;
+
 @Service
 @Transactional
 @AllArgsConstructor
@@ -37,8 +39,8 @@ public class TradeRecordService {
                 .map(trade -> fromSaveTradeReqToTrade(trade, foundUser, reportId, trade.getSide()))
                 .toList();
 
-        // todo call service to run report
-
+        out.println("Mapped entities ");
+        tradeList.forEach(out::println);
 
         return tradeRecordRepository.saveAll(tradeList);
     }
