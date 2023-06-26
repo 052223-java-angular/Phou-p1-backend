@@ -1,9 +1,6 @@
 package com.revature.yield.dtos.request;
 import com.revature.yield.entities.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.UUID;
 
@@ -11,12 +8,14 @@ import java.util.UUID;
 @Getter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class UpdateTradeRequest extends Request {
-
 
     private UUID id;
     private String reportDate;
     private String reportId;
+    private String assetName;
+    private String currencyPair;
     private String buyValue;
     private String sellValue;
     private String buyFee;
@@ -25,14 +24,10 @@ public class UpdateTradeRequest extends Request {
     private String soldQty;
     private String buyDate;
     private String sellDate;
-    private String pAndI;
-
-    // new fields - update erd
     private String orderId;
-    private String assetName;
     private String unitPrice;
-    private String currencyPair;
-
+    private String side;
+    private String date;
     private User user;
 
 }
